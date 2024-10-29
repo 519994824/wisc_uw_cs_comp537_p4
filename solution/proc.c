@@ -226,8 +226,7 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  // 设置子进程的 tickets，可以与父进程相同
-  np->tickets = curproc->tickets;
+  np->tickets = DEFAULT_TICKETS;
   np->stride = STRIDE1 / np->tickets;
   np->pass = global_pass;  // 初始化为 global_pass
   np->remain = 0;
