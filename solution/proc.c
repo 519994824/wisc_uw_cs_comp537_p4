@@ -562,13 +562,14 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
+      if(p->state == SLEEPING){
         // 更新全局票数和步长
         global_tickets += p->tickets;
         global_stride = STRIDE1 / global_tickets;
         // 更新进程的 pass 值
         p->pass = global_pass + p->remain;
         p->state = RUNNABLE;
+      }
       release(&ptable.lock);
       return 0;
     }
