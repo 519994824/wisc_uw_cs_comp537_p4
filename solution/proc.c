@@ -226,6 +226,17 @@ fork(void)
 
   acquire(&ptable.lock);
 
+  // 设置子进程的 tickets，可以与父进程相同
+  np->tickets = curproc->tickets;
+  np->stride = STRIDE1 / np->tickets;
+  np->pass = global_pass;  // 初始化为 global_pass
+  np->remain = 0;
+  np->rtime = 0;
+
+  // 更新全局变量
+  global_tickets += np->tickets;
+  global_stride = STRIDE1 / global_tickets;
+
   np->state = RUNNABLE;
 
   release(&ptable.lock);
@@ -552,6 +563,11 @@ kill(int pid)
       p->killed = 1;
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
+        // 更新全局票数和步长
+        global_tickets += p->tickets;
+        global_stride = STRIDE1 / global_tickets;
+        // 更新进程的 pass 值
+        p->pass = global_pass + p->remain;
         p->state = RUNNABLE;
       release(&ptable.lock);
       return 0;
